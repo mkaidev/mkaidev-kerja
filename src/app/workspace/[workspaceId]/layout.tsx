@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { Sidebar } from "./sidebar";
 import { Toolbar } from "./toolbar";
 
@@ -10,14 +8,6 @@ interface WorkspaceIdLayoutProps {
 }
 
 const WorkspaceIdLayout = ({ children }: WorkspaceIdLayoutProps) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
   return (
     <div className="h-full">
       <Toolbar />
