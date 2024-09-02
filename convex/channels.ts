@@ -69,7 +69,9 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx)
 
-    if (!userId) throw new Error("Unauthorized")
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
 
     const member = await ctx.db
       .query("members")
@@ -78,7 +80,9 @@ export const create = mutation({
       )
       .unique()
 
-    if (!member || member.role !== "admin") throw new Error("Unauthorized")
+    if (!member || member.role !== "admin") {
+      throw new Error("Unauthorized")
+    }
 
     const parsedName = args.name.replace(/\s+/g, "-").toLowerCase()
 
