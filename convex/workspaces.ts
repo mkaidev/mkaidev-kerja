@@ -36,6 +36,11 @@ export const create = mutation({
       role: "admin"
     });
 
+    await ctx.db.insert("channels", {
+      name: "general",
+      workspaceId
+    });
+
     return workspaceId;
   }
 });
@@ -71,7 +76,7 @@ export const get = query({
 });
 
 export const getById = query({
-  args: { id: v.id('workspaces') },
+  args: { id: v.id("workspaces") },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
 

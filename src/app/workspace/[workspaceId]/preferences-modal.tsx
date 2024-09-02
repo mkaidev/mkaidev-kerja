@@ -21,6 +21,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { useUpdateWorkspace } from "@/features/workspaces/api/use-update-workspace";
 import { useRemoveWorkspace } from "@/features/workspaces/api/use-remove-workspace";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 interface PreferencesModalProps {
   open: boolean;
@@ -111,6 +112,7 @@ export const PreferencesModal = ({
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Rename this workspace</DialogTitle>
+                  <DialogDescription className="hidden"></DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleEdit} className="space-y-4">
                   <Input
