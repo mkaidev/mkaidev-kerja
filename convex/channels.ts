@@ -8,11 +8,15 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx)
 
-    if (!userId) throw new Error("Unauthorized")
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
 
     const channel = await ctx.db.get(args.id)
 
-    if (!channel) throw new Error("Channel not found")
+    if (!channel) {
+      throw new Error("Channel not found")
+    }
 
     const member = await ctx.db
       .query("members")
@@ -21,10 +25,12 @@ export const remove = mutation({
       )
       .unique()
 
-    if (!member || member.role !== "admin") throw new Error("Unauthorized")
+    if (!member || member.role !== "admin") {
+      throw new Error("Unauthorized")
+    }
 
+    // TODO: Remove messages associated
     await ctx.db.delete(args.id)
-    // TODO: remove messages associated with channel
 
     return args.id
   }
@@ -38,11 +44,15 @@ export const update = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx)
 
-    if (!userId) throw new Error("Unauthorized")
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
 
     const channel = await ctx.db.get(args.id)
 
-    if (!channel) throw new Error("Channel not found")
+    if (!channel) {
+      throw new Error("Channel not found")
+    }
 
     const member = await ctx.db
       .query("members")
@@ -51,11 +61,15 @@ export const update = mutation({
       )
       .unique()
 
-    if (!member || member.role !== "admin") throw new Error("Unauthorized")
+    if (!member || member.role !== "admin") {
+      throw new Error("Unauthorized")
+    }
 
     const parsedName = args.name.replace(/\s+/g, "-").toLowerCase()
 
-    await ctx.db.patch(args.id, { name: parsedName })
+    await ctx.db.patch(args.id, {
+      name: parsedName
+    })
 
     return args.id
   }
@@ -100,11 +114,15 @@ export const getById = query({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx)
 
-    if (!userId) return null
+    if (!userId) {
+      return null
+    }
 
     const channel = await ctx.db.get(args.id)
 
-    if (!channel) return null
+    if (!channel) {
+      return null
+    }
 
     const member = await ctx.db
       .query("members")
@@ -113,7 +131,9 @@ export const getById = query({
       )
       .unique()
 
-    if (!member) return null
+    if (!member) {
+      return null
+    }
 
     return channel
   }
