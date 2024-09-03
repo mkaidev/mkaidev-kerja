@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { mutation, query } from './_generated/server';
+import { Doc } from './_generated/dataModel';
 
 const generateCode = () => {
   const code = Array.from(
@@ -43,8 +44,8 @@ export const join = mutation({
 
     await ctx.db.insert("members", {
       userId,
-      workspaceId: args.workspaceId,
-      role: "member"
+      workspaceId: workspace._id,
+      role: "member",
     })
 
     return workspace._id
@@ -131,7 +132,7 @@ export const get = query({
 
     const workspaceIds = members.map((member) => member.workspaceId);
 
-    const workspaces = [];
+    const workspaces: Doc<"workspaces">[] = [];
 
     for (const workspaceId of workspaceIds) {
       const workspace = await ctx.db.get(workspaceId);
@@ -143,6 +144,31 @@ export const get = query({
 
     return workspaces;
   }
+});
+
+export const getInfoById = query({
+  args: { id: v.id("workspaces") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      return null;
+    }
+
+    const member = await ctx.db
+      .query("members")
+      .withIndex("by_workspace_id_user_id", (q) =>
+        q.eq("workspaceId", args.id).eq("userId", userId)
+      )
+      .unique();
+
+    const workspace = await ctx.db.get(args.id);
+
+    return {
+      name: workspace?.name,
+      isMember: !!member,
+    };
+  },
 });
 
 export const getById = query({
