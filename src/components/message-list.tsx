@@ -42,9 +42,10 @@ export const MessageList = ({
   isLoadingMore,
   canLoadMore,
 }: MessageListProps) => {
+  const [editingId, setEditingId] = useState<Id<"messages"> | null>(null);
+
   const workspaceId = useWorkspaceId();
   const { data: currentMember } = useCurrentMember({ workspaceId });
-  const [editingId, setEditingId] = useState<Id<"messages"> | null>(null);
 
   const groupedMessages = data?.reduce(
     (groups, message) => {
@@ -93,7 +94,7 @@ export const MessageList = ({
                 updatedAt={message.updatedAt}
                 createdAt={message._creationTime}
                 isEditing={editingId === message._id}
-                setIsEditing={setEditingId}
+                setEditingId={setEditingId}
                 isCompact={isCompact}
                 hideThreadButton={variant === "thread"}
                 threadCount={message.threadCount}

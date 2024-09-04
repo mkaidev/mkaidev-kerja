@@ -1,9 +1,12 @@
-import { format, isToday, isYesterday } from "date-fns";
-import { Doc, Id } from "../../convex/_generated/dataModel";
 import dynamic from "next/dynamic";
+import { format, isToday, isYesterday } from "date-fns";
+
+import { Doc, Id } from "../../convex/_generated/dataModel";
+
 import { Hint } from "./hint";
-import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
+import { Toolbar } from "./toolbar";
 import { Thumbnail } from "./thumbnail";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 
 const Renderer = dynamic(() => import("@/components/renderer"), { ssr: false });
 
@@ -25,7 +28,7 @@ interface MessageProps {
   updatedAt: Doc<"messages">["updatedAt"];
   isEditing: boolean;
   isCompact?: boolean;
-  setIsEditing: (id: Id<"messages"> | null) => void;
+  setEditingId: (id: Id<"messages"> | null) => void;
   hideThreadButton?: boolean;
   threadCount?: number;
   threadImage?: string;
@@ -49,7 +52,7 @@ export const Message = ({
   updatedAt,
   isEditing,
   isCompact,
-  setIsEditing,
+  setEditingId,
   hideThreadButton,
   threadCount,
   threadImage,
@@ -109,6 +112,17 @@ export const Message = ({
           ) : null}
         </div>
       </div>
+      {!isEditing && (
+        <Toolbar
+          isAuthor={isAuthor}
+          isPending={false}
+          handleEdit={() => setEditingId(id)}
+          handleThread={() => {}}
+          handleDelete={() => {}}
+          handleReaction={() => {}}
+          hideThreadButton={hideThreadButton}
+        />
+      )}
     </div>
   );
 };
