@@ -36,7 +36,6 @@ export const useRemoveChannel = () => {
 
         const response = await mutation(values);
         options?.onSuccess?.(response);
-        setStatus('success');
         return response;
       } catch (error) {
         setStatus('error');

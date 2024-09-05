@@ -35,7 +35,6 @@ export const useGenerateUploadUrl = () => {
       const response = await mutation();
       options?.onSuccess?.(response);
       return response;
-
     } catch (error) {
       setStatus("error");
       options?.onError?.(error as Error);
