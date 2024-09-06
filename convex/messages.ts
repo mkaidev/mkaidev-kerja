@@ -5,11 +5,12 @@ import { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-const populateThread = async (ctx: QueryCtx, messageId: Id<'messages'>) => {
+const populateThread = async (ctx: QueryCtx, messageId: Id<"messages">) => {
   const messages = await ctx.db
-    .query('messages')
-    .withIndex('by_parent_message_id', (q) =>
-      q.eq('parentMessageId', messageId))
+    .query("messages")
+    .withIndex("by_parent_message_id", (q) =>
+      q.eq("parentMessageId", messageId),
+    )
     .collect();
 
   if (messages.length === 0) {
@@ -17,7 +18,8 @@ const populateThread = async (ctx: QueryCtx, messageId: Id<'messages'>) => {
       count: 0,
       image: undefined,
       timestamp: 0,
-    }
+      name: "",
+    };
   }
 
   const lastMessage = messages[messages.length - 1];
@@ -28,7 +30,8 @@ const populateThread = async (ctx: QueryCtx, messageId: Id<'messages'>) => {
       count: 0,
       image: undefined,
       timestamp: 0,
-    }
+      name: "",
+    };
   }
 
   const lastMessageUser = await populateUser(ctx, lastMessageMember.userId);
@@ -37,43 +40,44 @@ const populateThread = async (ctx: QueryCtx, messageId: Id<'messages'>) => {
     count: messages.length,
     image: lastMessageUser?.image,
     timeStamp: lastMessage._creationTime,
-  }
-}
+    name: lastMessageUser?.name,
+  };
+};
 
-const populateReactions = (ctx: QueryCtx, messageId: Id<'messages'>) => {
+const populateReactions = (ctx: QueryCtx, messageId: Id<"messages">) => {
   return ctx.db
-    .query('reactions')
-    .withIndex('by_message_id', (q) => q.eq('messageId', messageId))
+    .query("reactions")
+    .withIndex("by_message_id", (q) => q.eq("messageId", messageId))
     .collect();
-}
+};
 
-const populateUser = (ctx: QueryCtx, userId: Id<'users'>) => {
+const populateUser = (ctx: QueryCtx, userId: Id<"users">) => {
   return ctx.db.get(userId);
-}
+};
 
 const populateMember = (ctx: QueryCtx, memberId: Id<"members">) => {
   return ctx.db.get(memberId);
-}
+};
 
 const getMember = async (
   ctx: QueryCtx,
-  workspaceId: Id<'workspaces'>,
-  userId: Id<'users'>) => {
+  workspaceId: Id<"workspaces">,
+  userId: Id<"users">,
+) => {
   return ctx.db
-    .query('members')
-    .withIndex('by_workspace_id_user_id', (q) =>
-      q.eq('workspaceId', workspaceId)
-        .eq('userId', userId)
+    .query("members")
+    .withIndex("by_workspace_id_user_id", (q) =>
+      q.eq("workspaceId", workspaceId).eq("userId", userId),
     )
     .unique();
-}
+};
 
 export const remove = mutation({
   args: {
     id: v.id("messages"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx)
+    const userId = await getAuthUserId(ctx);
 
     if (!userId) {
       throw new Error("Unauthorized");
@@ -94,8 +98,8 @@ export const remove = mutation({
     await ctx.db.delete(args.id);
 
     return args.id;
-  }
-})
+  },
+});
 
 export const update = mutation({
   args: {
@@ -103,7 +107,7 @@ export const update = mutation({
     body: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx)
+    const userId = await getAuthUserId(ctx);
 
     if (!userId) {
       throw new Error("Unauthorized");
@@ -124,21 +128,21 @@ export const update = mutation({
     await ctx.db.patch(args.id, {
       body: args.body,
       updatedAt: Date.now(),
-    })
+    });
 
     return args.id;
-  }
-})
+  },
+});
 
 export const getById = query({
   args: {
     id: v.id("messages"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx)
+    const userId = await getAuthUserId(ctx);
 
     if (!userId) {
-      return null
+      return null;
     }
 
     const message = await ctx.db.get(args.id);
@@ -171,24 +175,18 @@ export const getById = query({
       return {
         ...reaction,
         count: reactions.filter((r) => r.value === reaction.value).length,
-      }
+      };
     });
 
     const dedupedReactions = reactionsWithCounts.reduce(
       (acc, reaction) => {
-        const existingReaction = acc.find(
-          (r) => r.value === reaction.value,
-        );
+        const existingReaction = acc.find((r) => r.value === reaction.value);
 
         if (existingReaction) {
           existingReaction.memberIds = Array.from(
-            new Set([
-              ...existingReaction.memberIds,
-              reaction.memberId,
-            ]),
+            new Set([...existingReaction.memberIds, reaction.memberId]),
           );
-        }
-        else {
+        } else {
           acc.push({
             ...reaction,
             memberIds: [reaction.memberId],
@@ -197,25 +195,27 @@ export const getById = query({
 
         return acc;
       },
-      [] as (Doc<'reactions'> & {
+      [] as (Doc<"reactions"> & {
         count: number;
-        memberIds: Id<'members'>[];
-      })[]
-    )
+        memberIds: Id<"members">[];
+      })[],
+    );
 
     const reactionsWithoutMemberIdProperty = dedupedReactions.map(
-      ({ memberId, ...rest }) => rest
+      ({ memberId, ...rest }) => rest,
     );
 
     return {
       ...message,
-      image: message.image ? await ctx.storage.getUrl(message.image) : undefined,
+      image: message.image
+        ? await ctx.storage.getUrl(message.image)
+        : undefined,
       user,
       member,
       reactions: reactionsWithoutMemberIdProperty,
-    }
-  }
-})
+    };
+  },
+});
 
 export const get = query({
   args: {
@@ -225,7 +225,7 @@ export const get = query({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx)
+    const userId = await getAuthUserId(ctx);
 
     if (!userId) {
       throw new Error("Unauthorized");
@@ -244,14 +244,14 @@ export const get = query({
     }
 
     const results = await ctx.db
-      .query('messages')
-      .withIndex('by_channel_id_parent_message_id_conversation_id', (q) =>
+      .query("messages")
+      .withIndex("by_channel_id_parent_message_id_conversation_id", (q) =>
         q
-          .eq('channelId', args.channelId)
-          .eq('parentMessageId', args.parentMessageId)
-          .eq('conversationId', _conversationId)
+          .eq("channelId", args.channelId)
+          .eq("parentMessageId", args.parentMessageId)
+          .eq("conversationId", _conversationId),
       )
-      .order('desc')
+      .order("desc")
       .paginate(args.paginationOpts);
 
     return {
@@ -275,8 +275,9 @@ export const get = query({
             const reactionsWithCounts = reactions.map((reaction) => {
               return {
                 ...reaction,
-                count: reactions.filter((r) => r.value === reaction.value).length,
-              }
+                count: reactions.filter((r) => r.value === reaction.value)
+                  .length,
+              };
             });
 
             const dedupedReactions = reactionsWithCounts.reduce(
@@ -287,13 +288,9 @@ export const get = query({
 
                 if (existingReaction) {
                   existingReaction.memberIds = Array.from(
-                    new Set([
-                      ...existingReaction.memberIds,
-                      reaction.memberId,
-                    ]),
+                    new Set([...existingReaction.memberIds, reaction.memberId]),
                   );
-                }
-                else {
+                } else {
                   acc.push({
                     ...reaction,
                     memberIds: [reaction.memberId],
@@ -302,14 +299,14 @@ export const get = query({
 
                 return acc;
               },
-              [] as (Doc<'reactions'> & {
+              [] as (Doc<"reactions"> & {
                 count: number;
-                memberIds: Id<'members'>[];
-              })[]
-            )
+                memberIds: Id<"members">[];
+              })[],
+            );
 
             const reactionsWithoutMemberIdProperty = dedupedReactions.map(
-              ({ memberId, ...rest }) => rest
+              ({ memberId, ...rest }) => rest,
             );
 
             return {
@@ -320,15 +317,17 @@ export const get = query({
               reactions: reactionsWithoutMemberIdProperty,
               threadCount: thread.count,
               threadImage: thread.image,
+              threadName: thread.name,
               threadTimestamp: thread.timestamp,
-            }
-          })
+            };
+          }),
         )
-      )
-        .filter((message): message is NonNullable<typeof message> => message !== null)
-    }
-  }
-})
+      ).filter(
+        (message): message is NonNullable<typeof message> => message !== null,
+      ),
+    };
+  },
+});
 
 export const create = mutation({
   args: {
@@ -340,7 +339,7 @@ export const create = mutation({
     parentMessageId: v.optional(v.id("messages")),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx)
+    const userId = await getAuthUserId(ctx);
 
     if (!userId) {
       throw new Error("Unauthorized");
@@ -356,7 +355,7 @@ export const create = mutation({
 
     // only possible if we are replying in a thread in 1:1 conversation
     if (!args.conversationId && !args.channelId && args.parentMessageId) {
-      const parentMessage = await ctx.db.get(args.parentMessageId)
+      const parentMessage = await ctx.db.get(args.parentMessageId);
 
       if (!parentMessage) {
         throw new Error("Parent message not found");
@@ -365,7 +364,7 @@ export const create = mutation({
       _conversationId = parentMessage.conversationId;
     }
 
-    const messageId = await ctx.db.insert('messages', {
+    const messageId = await ctx.db.insert("messages", {
       memberId: member._id,
       body: args.body,
       image: args.image,
@@ -377,4 +376,4 @@ export const create = mutation({
 
     return messageId;
   },
-})
+});

@@ -129,7 +129,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
       groups[dateKey].unshift(message);
       return groups;
     },
-    {} as Record<string, typeof results>
+    {} as Record<string, typeof results>,
   );
 
   if (loadingMessage || status === "LoadingFirstPage") {
@@ -189,7 +189,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
                 previousMessage.user?._id === message.user?._id &&
                 differenceInMinutes(
                   new Date(message._creationTime),
-                  new Date(previousMessage._creationTime)
+                  new Date(previousMessage._creationTime),
                 ) < TIME_THRESHOLD;
 
               return (
@@ -211,6 +211,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
                   hideThreadButton
                   threadCount={message.threadCount}
                   threadImage={message.threadImage}
+                  threadName={message.threadName}
                   threadTimestamp={message.threadTimestamp}
                 />
               );
@@ -228,7 +229,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
                     loadMore();
                   }
                 },
-                { threshold: 1.0 }
+                { threshold: 1.0 },
               );
               observer.observe(el);
               return () => observer.disconnect();

@@ -59,7 +59,7 @@ export const MessageList = ({
       groups[dateKey].unshift(message);
       return groups;
     },
-    {} as Record<string, typeof data>
+    {} as Record<string, typeof data>,
   );
 
   return (
@@ -79,7 +79,7 @@ export const MessageList = ({
               previousMessage.user?._id === message.user?._id &&
               differenceInMinutes(
                 new Date(message._creationTime),
-                new Date(previousMessage._creationTime)
+                new Date(previousMessage._creationTime),
               ) < TIME_THRESHOLD;
 
             return (
@@ -101,6 +101,7 @@ export const MessageList = ({
                 hideThreadButton={variant === "thread"}
                 threadCount={message.threadCount}
                 threadImage={message.threadImage}
+                threadName={message.threadName}
                 threadTimestamp={message.threadTimestamp}
               />
             );
@@ -118,7 +119,7 @@ export const MessageList = ({
                   loadMore();
                 }
               },
-              { threshold: 1.0 }
+              { threshold: 1.0 },
             );
             observer.observe(el);
             return () => observer.disconnect();
