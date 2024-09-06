@@ -31,17 +31,19 @@ const WorkspaceIdLayout = ({ children }: WorkspaceIdLayoutProps) => {
         <Sidebar />
         <ResizablePanelGroup
           direction="horizontal"
-          autoSaveId="md-workspace-layout"
+          autoSaveId="ca-workspace-layout"
         >
           <ResizablePanel
-            defaultSize={20}
             minSize={11}
+            defaultSize={20}
             className="bg-[#5E2C5F]"
           >
             <WorkspaceSidebar />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel minSize={20}>{children}</ResizablePanel>
+          <ResizablePanel minSize={20} defaultSize={29}>
+            {children}
+          </ResizablePanel>
           {showPanel && (
             <>
               <ResizableHandle withHandle />
