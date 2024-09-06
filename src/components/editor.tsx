@@ -77,10 +77,9 @@ const Editor = ({
       modules: {
         toolbar: [
           ["bold", "italic", "underline", "strike"],
-          ["blockquote", "code-block"],
           [{ list: "ordered" }, { list: "bullet" }],
           [{ script: "sub" }, { script: "super" }],
-          ["link", "clean"],
+          ["link"],
         ],
         keyboard: {
           bindings: {
